@@ -8,5 +8,5 @@ compiles more quickly, especially when embedding a large number of files.
 
 Parts of the implementation of tarfs are taken from go-bindata-assetfs.
 
-Look at [build.bash](tree/master/demo/build.bash) to build the demo and see
+Look at [build.bash](demo/build.bash) to build the demo and see
 how it works.
