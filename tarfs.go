@@ -96,7 +96,6 @@ func (fs *FileSystem) Open(name string) (http.File, error) {
 		return nil, fmt.Errorf("File %v not found", name)
 	}
 	fmt.Fprintf(os.Stderr, "Found: %v\n", name)
-	fmt.Fprintln(os.Stderr, string(b))
 	return NewAssetFile(name, b), nil
 }
 
