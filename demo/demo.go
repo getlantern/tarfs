@@ -10,7 +10,7 @@ import (
 func main() {
 	var fs http.FileSystem
 	var err error
-	fs, err = tarfs.New(Data)
+	fs, err = tarfs.New(Data, "localresources")
 	if err != nil {
 		log.Fatal(err.Error())
 	}

@@ -21,14 +21,29 @@ var (
 
 type FileSystem struct {
 	files map[string][]byte
+	local http.FileSystem
 }
 
 func (fs *FileSystem) Get(name string) []byte {
 	return fs.files[name]
 }
 
-func New(data []byte) (*FileSystem, error) {
-	fs := &FileSystem{make(map[string][]byte, 0)}
+func New(data []byte, local string) (*FileSystem, error) {
+	var lfs http.FileSystem
+	if local != "" {
+		_, err := os.Stat(local)
+		if err != nil {
+			if os.IsNotExist(err) {
+				fmt.Fprintf(os.Stderr, "Local dir %v does not exist, not using\n", local)
+			} else {
+				fmt.Fprintf(os.Stderr, "Unable to stat local dir %v: %v\n", local, err)
+				os.Exit(5)
+			}
+		} else {
+			lfs = http.Dir(local)
+		}
+	}
+	fs := &FileSystem{make(map[string][]byte, 0), lfs}
 
 	br := &trackingreader{bytes.NewReader(data), 0}
 
@@ -69,10 +84,13 @@ func (fs *FileSystem) Open(name string) (http.File, error) {
 	}
 
 	fmt.Fprintf(os.Stderr, "name: %v\n", name)
-	if strings.HasSuffix(name, "/") {
-		return NewAssetDirectory(name), nil
+	if fs.local != nil {
+		// Use local filesystem when possible
+		file, err := fs.local.Open(name)
+		if err == nil {
+			return file, err
+		}
 	}
-
 	b, found := fs.files[name]
 	if !found {
 		return nil, fmt.Errorf("File %v not found", name)
