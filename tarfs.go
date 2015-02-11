@@ -30,17 +30,10 @@ func (fs *FileSystem) Get(name string) []byte {
 func New(data []byte) (*FileSystem, error) {
 	fs := &FileSystem{make(map[string][]byte, 0)}
 
-	remaining := data
+	br := &trackingreader{bytes.NewReader(data), 0}
+
 	for {
-		if len(remaining) == 0 {
-			break
-		}
-
-		// TODO: see if we can avoid having to create a new pair of readers for
-		// each file
-		br := &trackingreader{bytes.NewReader(remaining), 0}
 		tr := tar.NewReader(br)
-
 		hdr, err := tr.Next()
 		if err == io.EOF {
 			// end of tar archive
@@ -52,11 +45,10 @@ func New(data []byte) (*FileSystem, error) {
 
 		// Set the data to be a slice of the original
 		end := br.pos + hdr.Size
-		fs.files[hdr.Name] = remaining[br.pos:end]
+		fs.files[hdr.Name] = data[br.pos:end]
 		// Round up to multiple of 512
 		end = int64(math.Ceil(float64(end)/512)) * 512
-
-		remaining = remaining[end:]
+		err = br.AdvanceTo(end)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to seek to next header: %v", err)
 		}
@@ -102,8 +94,8 @@ func (r *trackingreader) Read(b []byte) (int, error) {
 	return n, err
 }
 
-func (r *trackingreader) Advance(offset int64) error {
-	n, err := r.Reader.Seek(offset, 1)
+func (r *trackingreader) AdvanceTo(to int64) error {
+	n, err := r.Reader.Seek(to, 0)
 	if err != nil {
 		return err
 	}
