@@ -17,6 +17,10 @@ import (
 	"github.com/getlantern/golog"
 )
 
+const (
+	ExitLocalDirUnavailable = 1
+)
+
 var (
 	log            = golog.LoggerFor("tarfs")
 	fileTimestamp  = time.Now()
@@ -43,7 +47,7 @@ func New(tarData []byte, local string) (*FileSystem, error) {
 				local = ""
 			} else {
 				log.Errorf("Unable to stat local dir %v: %v\n", local, err)
-				os.Exit(5)
+				os.Exit(ExitLocalDirUnavailable)
 			}
 		} else {
 			log.Debugf("Using local filesystem at %v", local)

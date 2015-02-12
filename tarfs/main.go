@@ -12,6 +12,11 @@ import (
 	"github.com/getlantern/tarfs"
 )
 
+const (
+	ExitWrongUsage      = 1
+	ExitUnexpectedError = 2
+)
+
 var (
 	pkg     = flag.String("pkg", "", "The package name to use, defaults to 'main'")
 	varname = flag.String("var", "Resources", "The variable name to use, defaults to 'Data'")
@@ -19,7 +24,7 @@ var (
 
 func die(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg+"\n", args...)
-	os.Exit(1)
+	os.Exit(ExitUnexpectedError)
 }
 
 func main() {
@@ -27,7 +32,7 @@ func main() {
 	if *pkg == "" {
 		fmt.Fprintln(os.Stderr, "Please specify a pkg")
 		flag.Usage()
-		os.Exit(2)
+		os.Exit(ExitWrongUsage)
 	}
 	if len(flag.Args()) == 0 {
 		die("Please specify a folder to embed")
