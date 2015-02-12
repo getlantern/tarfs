@@ -18,8 +18,8 @@ const (
 )
 
 var (
-	pkg     = flag.String("pkg", "", "The package name to use, defaults to 'main'")
-	varname = flag.String("var", "Resources", "The variable name to use, defaults to 'Data'")
+	pkg     = flag.String("pkg", "", "The package name to use")
+	varname = flag.String("var", "Resources", "The variable name to use, defaults to 'Resources'")
 )
 
 func die(msg string, args ...interface{}) {
