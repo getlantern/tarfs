@@ -50,7 +50,7 @@ func New(tarData []byte, local string) (*FileSystem, error) {
 				os.Exit(ExitLocalDirUnavailable)
 			}
 		} else {
-			log.Debugf("Using local filesystem at %v", local)
+			log.Tracef("Using local filesystem at %v", local)
 		}
 	}
 

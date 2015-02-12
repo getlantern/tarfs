@@ -16,7 +16,7 @@ func TestRoundTrip(t *testing.T) {
 		t.Fatalf("Unable to load expectedA: %v", err)
 	}
 
-	expectedB, err := ioutil.ReadFile("localresources/b.txt")
+	expectedB, err := ioutil.ReadFile("localresources/sub/b.txt")
 	if err != nil {
 		t.Fatalf("Unable to load expectedB: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestRoundTrip(t *testing.T) {
 		assert.Equal(t, string(expectedA), string(a), "A should have matched expected")
 	}
 
-	b, err := fs.Get("b.txt")
+	b, err := fs.Get("sub/b.txt")
 	if assert.NoError(t, err, "b.txt should have loaded") {
 		assert.Equal(t, string(expectedB), string(b), "B should have matched expected")
 	}
