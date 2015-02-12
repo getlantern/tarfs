@@ -99,6 +99,7 @@ func New(tarData []byte, local string) (*FileSystem, error) {
 // Note - the implementation of local reads is not optimized and is primarily
 // intended for development-time usage.
 func (fs *FileSystem) Get(path string) ([]byte, error) {
+	path = filepath.Clean(path)
 	if fs.local != "" {
 		b, err := ioutil.ReadFile(filepath.Join(fs.local, path))
 		if err != nil {

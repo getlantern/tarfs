@@ -21,6 +21,11 @@ func TestRoundTrip(t *testing.T) {
 		t.Fatalf("Unable to load expectedB: %v", err)
 	}
 
+	expectedC, err := ioutil.ReadFile("resources/sub/c.txt")
+	if err != nil {
+		t.Fatalf("Unable to load expectedC: %v", err)
+	}
+
 	tarString := bytes.NewBuffer(nil)
 	err = EncodeToTarString("resources", tarString)
 	if err != nil {
@@ -53,16 +58,16 @@ func TestRoundTrip(t *testing.T) {
 	f, err = fs.Open("/nonexistentfile")
 	assert.Error(t, err, "Opening nonexistent file should fail")
 
-	f, err = fs.Open("/a.txt")
-	if assert.NoError(t, err, "Opening existing file should work") {
+	f, err = fs.Open("/sub//c.txt")
+	if assert.NoError(t, err, "Opening existing file with double slash should work") {
 		fi, err := f.Stat()
 		if assert.NoError(t, err, "Should be able to stat file") {
 			if assert.False(t, fi.IsDir(), "File should not be a directory") {
-				if assert.Equal(t, len(expectedA), fi.Size(), "File info should report correct size") {
+				if assert.Equal(t, len(expectedC), fi.Size(), "File info should report correct size") {
 					a := bytes.NewBuffer(nil)
 					_, err := io.Copy(a, f)
 					if assert.NoError(t, err, "Should be able to read from file") {
-						assert.Equal(t, expectedA, a.Bytes(), "Should have read correct data")
+						assert.Equal(t, expectedC, a.Bytes(), "Should have read correct data")
 					}
 				}
 			}
