@@ -120,7 +120,7 @@ func (fs *FileSystem) Get(path string) ([]byte, error) {
 func (fs *FileSystem) Open(name string) (http.File, error) {
 	if strings.HasSuffix(name, "/") {
 		log.Tracef("Returning empty directory for %v", name)
-		return NewAssetDirectory(name), nil
+		return newAssetDirectory(name), nil
 	}
 
 	// Remove leading slash
@@ -132,7 +132,7 @@ func (fs *FileSystem) Open(name string) (http.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewAssetFile(name, b), nil
+	return newAssetFile(name, b), nil
 }
 
 // trackingreader is a wrapper around bytes.Reader that tracks the current
@@ -211,7 +211,7 @@ type AssetFile struct {
 	FakeFile
 }
 
-func NewAssetFile(name string, content []byte) *AssetFile {
+func newAssetFile(name string, content []byte) *AssetFile {
 	return &AssetFile{
 		bytes.NewReader(content),
 		ioutil.NopCloser(nil),
@@ -232,7 +232,7 @@ type AssetDirectory struct {
 	AssetFile
 }
 
-func NewAssetDirectory(name string) *AssetDirectory {
+func newAssetDirectory(name string) *AssetDirectory {
 	return &AssetDirectory{
 		AssetFile{
 			bytes.NewReader(nil),
