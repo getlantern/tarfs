@@ -40,6 +40,15 @@ type FileSystem struct {
 // a non-empty string, the resulting FileSystem will first look for resources in
 // the local file system before returning an embedded resource.
 func New(tarData []byte, local string) (*FileSystem, error) {
+	return NewWithListener(tarData, local, func(name string, file []byte) []byte {
+		return file
+	})
+}
+
+// NewWithListener creates a new FileSystem using the given in-memory tar data. If local is
+// a non-empty string, the resulting FileSystem will first look for resources in
+// the local file system before returning an embedded resource.
+func NewWithListener(tarData []byte, local string, fileListener func(name string, file []byte) []byte) (*FileSystem, error) {
 	if local != "" {
 		_, err := os.Stat(local)
 		if err != nil {
@@ -77,7 +86,8 @@ func New(tarData []byte, local string) (*FileSystem, error) {
 		// containing the specified size of data. We don't use tr.Read() so that
 		// we can avoid copying.
 		end := br.pos + hdr.Size
-		fs.files[hdr.Name] = tarData[br.pos:end]
+		fs.files[hdr.Name] = fileListener(hdr.Name, tarData[br.pos:end])
+
 		log.Tracef("Loaded tarfs file %v", hdr.Name)
 
 		// Advance to the next tar header. Note that we round up to the next
