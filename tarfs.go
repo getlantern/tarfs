@@ -28,6 +28,10 @@ var (
 	emptyFileInfos = []os.FileInfo{}
 )
 
+// FilterFunc is a function for allowing the caller to filter file names and
+// file content.
+type FilterFunc func(fileName string, fileContent []byte) (string, []byte)
+
 // FileSystem is a tarfs filesystem. It exposes a Get method for accessing
 // resources by path. It also implements http.FileSystem for use with
 // http.FileServer.
@@ -40,6 +44,17 @@ type FileSystem struct {
 // a non-empty string, the resulting FileSystem will first look for resources in
 // the local file system before returning an embedded resource.
 func New(tarData []byte, local string) (*FileSystem, error) {
+	return NewWithFilter(tarData, local, func(name string, file []byte) (string, []byte) {
+		return name, file
+	})
+}
+
+// NewWithFilter creates a new FileSystem using the given in-memory tar data.
+// If local is a non-empty string, the resulting FileSystem will first look for
+// resources in the local file system before returning an embedded resource.
+// The filter allows the caller to alter the file name and file content if
+// desired for any reason.
+func NewWithFilter(tarData []byte, local string, fileFilter FilterFunc) (*FileSystem, error) {
 	if local != "" {
 		_, err := os.Stat(local)
 		if err != nil {
@@ -77,7 +92,9 @@ func New(tarData []byte, local string) (*FileSystem, error) {
 		// containing the specified size of data. We don't use tr.Read() so that
 		// we can avoid copying.
 		end := br.pos + hdr.Size
-		fs.files[hdr.Name] = tarData[br.pos:end]
+		name, content := fileFilter(hdr.Name, tarData[br.pos:end])
+		fs.files[name] = content
+
 		log.Tracef("Loaded tarfs file %v", hdr.Name)
 
 		// Advance to the next tar header. Note that we round up to the next
