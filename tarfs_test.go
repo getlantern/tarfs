@@ -126,7 +126,7 @@ func tarStringToBytes(t *testing.T, bbuf *bytes.Buffer) []byte {
 		s := tarString[i+2 : i+4]
 		b, err := hex.DecodeString(s)
 		if err != nil {
-			t.Fatalf("Unable to decode %v: %v", err)
+			t.Fatalf("Unable to decode %v: %v", s, err)
 		}
 		buf = append(buf, b...)
 	}
